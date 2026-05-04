@@ -1,0 +1,51 @@
+.app-header {
+  height: var(--header-h, 56px);
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 0 1.75rem;
+  background: #0f172a;
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  box-shadow: 0 1px 0 rgba(255,255,255,0.06);
+
+  .brand {
+    font-size: 1.2rem;
+    font-weight: 800;
+    color: #f8fafc;
+    letter-spacing: -0.02em;
+    white-space: nowrap;
+
+    .accent { color: #f97316; }
+  }
+
+  .nav-links {
+    display: flex;
+    gap: 0.25rem;
+
+    a {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.45rem 0.875rem;
+      border-radius: 8px;
+      font-size: 0.84rem;
+      font-weight: 500;
+      text-decoration: none;
+      color: #94a3b8;
+      transition: all 0.18s;
+
+      &:hover {
+        background: rgba(255,255,255,0.07);
+        color: #f8fafc;
+      }
+
+      &.active {
+        background: rgba(249,115,22,0.18);
+        color: #fb923c;
+        font-weight: 600;
+      }
+    }
+  }
+}

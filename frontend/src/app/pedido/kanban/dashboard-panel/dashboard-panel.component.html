@@ -1,0 +1,68 @@
+<div class="dash-panel">
+
+  <div class="dash-header">
+    <span class="dash-title">📊 Dashboard</span>
+    <div class="mes-nav">
+      <button (click)="prevMes()">‹</button>
+      <span>{{ MESES[mesAtual() - 1] }} {{ anoAtual() }}</span>
+      <button (click)="nextMes()">›</button>
+    </div>
+  </div>
+
+  @if (resumo(); as r) {
+    <div class="kpis">
+      <div class="kpi">
+        <div class="kpi-label">💸 Despesas</div>
+        <div class="kpi-value red">{{ fmt(r.totalDespesas) }}</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">✅ Arrecadado</div>
+        <div class="kpi-value green">{{ fmt(r.valorArrecadado) }}</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">📈 Saldo Esperado</div>
+        <div class="kpi-value blue">{{ fmt(r.saldoEsperado) }}</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="desp-header">
+      <span>Despesas do mês</span>
+      <button class="btn-add-desp" (click)="showForm.set(!showForm())">
+        {{ showForm() ? '✕' : '+ Adicionar' }}
+      </button>
+    </div>
+
+    @if (showForm()) {
+      <form [formGroup]="form" (ngSubmit)="saveDespesa()" class="desp-form">
+        <select formControlName="tipo">
+          @for (t of TIPOS; track t.value) {
+            <option [value]="t.value">{{ t.label }}</option>
+          }
+        </select>
+        <input type="date" formControlName="data" />
+        <input type="number" formControlName="valor" placeholder="Valor (R$)" min="0.01" step="0.01" />
+        <input formControlName="descricao" placeholder="Descrição (opcional)" />
+        <button type="submit" class="btn-salvar-desp">Salvar</button>
+      </form>
+    }
+
+    <div class="desp-list">
+      @for (d of r.despesasMes; track d.id) {
+        <div class="desp-item">
+          <span class="tipo-dot" [style.background]="getTipo(d.tipo).cor"></span>
+          <div class="desp-info">
+            <span class="tipo-nome">{{ getTipo(d.tipo).label }}</span>
+            @if (d.descricao) { <span class="desp-desc">{{ d.descricao }}</span> }
+          </div>
+          <span class="desp-valor">{{ fmt(d.valor) }}</span>
+          <button class="del-btn" (click)="deleteDespesa(d.id!)">✕</button>
+        </div>
+      } @empty {
+        <p class="empty-desp">Sem despesas neste mês</p>
+      }
+    </div>
+  }
+
+</div>

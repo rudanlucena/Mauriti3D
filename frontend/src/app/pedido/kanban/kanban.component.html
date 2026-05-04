@@ -1,0 +1,165 @@
+<div class="header">
+  <div class="search-wrap">
+    <span class="search-icon">🔍</span>
+    <input class="search-input" type="text" placeholder="Buscar cliente..." (input)="onSearch($event)" />
+  </div>
+  <button class="btn-novo" (click)="openCreate()">+ Novo Pedido</button>
+</div>
+
+<div class="kanban-board">
+
+  <!-- FILA e INICIADO -->
+  @for (col of colunasAtivas; track col.status) {
+    <div class="kanban-column">
+      <div class="column-header" [class]="col.cssClass">
+        <span>{{ col.label }}</span>
+        <span class="badge">{{ col.allPedidos().length }}</span>
+      </div>
+      <div class="column-body">
+        @for (pedido of col.pedidos(); track pedido.id) {
+          <div class="pedido-card" (click)="openDetail(pedido)">
+            <div class="card-top">
+              <div class="card-avatar">{{ initials(pedido.nomeCliente) }}</div>
+              <div class="card-names">
+                <div class="card-cliente">{{ pedido.nomeCliente }}</div>
+                <div class="card-item">{{ pedido.item }}</div>
+              </div>
+            </div>
+            <div class="card-footer">
+              <span class="card-valor" [class.pago]="pedido.statusPagamento === 'PAGO'" [class.pendente]="pedido.statusPagamento === 'PENDENTE'">
+                {{ formatValor(pedido.valor) }}
+              </span>
+              <div class="card-meta">
+                @if (pedido.tempoEstimado) {
+                  <span class="card-tempo">⏱ {{ formatTempo(pedido.tempoEstimado) }}</span>
+                }
+                <span class="card-data">{{ formatData(pedido.dataEntrega) }}</span>
+              </div>
+            </div>
+          </div>
+        } @empty {
+          <div class="empty">Nenhum pedido</div>
+        }
+        @if (col.pedidos().length < col.allPedidos().length) {
+          <button class="btn-ver-mais" (click)="verMais(col.status)">
+            Ver mais ({{ col.allPedidos().length - col.pedidos().length }} restantes)
+          </button>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- FINALIZADO (paginado) -->
+  <div class="kanban-column" style="max-width:340px">
+    <div class="column-header finalizado">
+      <span>Finalizado</span>
+      <span class="badge">{{ finalizadosTotalItems() }}</span>
+    </div>
+    <div class="column-body">
+      @for (pedido of finalizados(); track pedido.id) {
+        <div class="pedido-card" (click)="openDetail(pedido)">
+          <div class="card-cliente">{{ pedido.nomeCliente }}</div>
+          <div class="card-item">{{ pedido.item }}</div>
+          <div class="card-footer">
+            <span class="card-valor" [class.pago]="pedido.statusPagamento === 'PAGO'" [class.pendente]="pedido.statusPagamento === 'PENDENTE'">
+              {{ formatValor(pedido.valor) }}
+            </span>
+            @if (pedido.tempoEstimado) {
+              <span class="card-tempo">⏱ {{ formatTempo(pedido.tempoEstimado) }}</span>
+            }
+          </div>
+          <div class="card-data">📅 {{ formatData(pedido.dataEntrega) }}</div>
+        </div>
+      } @empty {
+        <div class="empty">Nenhum pedido</div>
+      }
+    </div>
+    @if (finalizadosTotalPaginas() > 1) {
+      <div class="paginacao">
+        <button class="pag-btn" [disabled]="finalizadosPagina() === 0" (click)="paginaAnterior()">‹</button>
+        <span class="pag-info">{{ finalizadosPagina() + 1 }} / {{ finalizadosTotalPaginas() }}</span>
+        <button class="pag-btn" [disabled]="finalizadosPagina() >= finalizadosTotalPaginas() - 1" (click)="proximaPagina()">›</button>
+      </div>
+    }
+  </div>
+
+  <!-- Dashboard -->
+  <app-dashboard-panel />
+
+</div>
+
+<!-- Modal de detalhe -->
+@if (selectedPedido(); as p) {
+  <div class="modal-overlay" (click)="closeDetail()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <h2 class="modal-title">{{ p.nomeCliente }}</h2>
+
+      <div class="modal-badges">
+        <span class="badge-status" [class]="p.statusPedido.toLowerCase()">{{ labelStatus(p.statusPedido) }}</span>
+        <span class="badge-status" [class]="p.statusPagamento.toLowerCase()">
+          {{ p.statusPagamento === 'PAGO' ? 'Pago' : 'Pendente' }}
+        </span>
+      </div>
+
+      <div class="modal-info">
+        <div class="info-item full">
+          <div class="label">Item</div>
+          <div class="value">{{ p.item }}</div>
+        </div>
+        <div class="info-item">
+          <div class="label">Valor</div>
+          <div class="value valor" [class.pago]="p.statusPagamento === 'PAGO'" [class.pendente]="p.statusPagamento === 'PENDENTE'">
+            {{ formatValor(p.valor) }}
+          </div>
+        </div>
+        <div class="info-item">
+          <div class="label">Data de Entrega</div>
+          <div class="value">{{ formatData(p.dataEntrega) }}</div>
+        </div>
+        @if (p.tempoEstimado) {
+          <div class="info-item">
+            <div class="label">Tempo Estimado</div>
+            <div class="value">{{ formatTempo(p.tempoEstimado) }}</div>
+          </div>
+        }
+        @if (p.endereco) {
+          <div class="info-item full">
+            <div class="label">Endereço</div>
+            <div class="value">{{ p.endereco }}</div>
+          </div>
+        }
+        @if (p.nota) {
+          <div class="info-item full">
+            <div class="label">Notas</div>
+            <div class="value nota">{{ p.nota }}</div>
+          </div>
+        }
+        @if (p.dataComemorativaId) {
+          <div class="info-item full">
+            <div class="label">Data Comemorativa</div>
+            <div class="value">🎉 {{ getNomeDataComem(p.dataComemorativaId) }}</div>
+          </div>
+        }
+        <div class="info-item">
+          <div class="label">Criado em</div>
+          <div class="value meta">{{ formatDateTime(p.criadoEm) }}</div>
+        </div>
+        <div class="info-item">
+          <div class="label">Atualizado em</div>
+          <div class="value meta">{{ formatDateTime(p.atualizadoEm) }}</div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <a [href]="whatsappLink(p.whatsapp)" target="_blank" rel="noopener" class="btn-whats">📱 WhatsApp</a>
+        <button class="btn-editar" (click)="openEdit(p)">✏️ Editar</button>
+        <button class="btn-fechar" (click)="closeDetail()">Fechar</button>
+        <button class="btn-excluir" (click)="delete(p.id!)">🗑️ Excluir</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (showForm()) {
+  <app-pedido-form [pedido]="editingPedido()" (saved)="onSaved()" (cancelled)="closeForm()" />
+}

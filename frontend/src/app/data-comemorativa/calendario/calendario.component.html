@@ -1,0 +1,138 @@
+<div class="cal-header">
+  <div class="header-actions">
+    <div class="year-nav">
+      <button (click)="prevYear()">‹</button>
+      <span>{{ anoAtual() }}</span>
+      <button (click)="nextYear()">›</button>
+    </div>
+    <button class="btn-add" (click)="showAddForm.set(true)">+ Nova Data</button>
+  </div>
+</div>
+
+<div class="cal-body">
+
+  <!-- Grid de meses -->
+  <div class="months-grid">
+    @for (mes of meses(); track mes.index) {
+      <div class="month-card">
+        <div class="month-name">{{ mes.name }}</div>
+        <div class="week-header">
+          @for (d of weekDays; track $index) {
+            <span>{{ d }}</span>
+          }
+        </div>
+        <div class="days-grid">
+          @for (day of mes.days; track $index) {
+            @if (getEvent(mes.index, day); as evt) {
+              <button class="day event" [style.background]="evt.cor" [title]="evt.nome"
+                      (click)="clickDay(evt)">
+                {{ day }}
+              </button>
+            } @else {
+              <span class="day" [class.today]="isToday(mes.index, day)" [class.empty]="!day">
+                {{ day ?? '' }}
+              </span>
+            }
+          }
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Lista de datas cadastradas -->
+  <div class="datas-list">
+    <h3>Datas Cadastradas</h3>
+    @for (d of datas(); track d.id) {
+      <div class="data-item" (click)="clickDay(d)">
+        <span class="data-cor" [style.background]="d.cor"></span>
+        <span class="data-info">{{ d.nome }}</span>
+        <span class="data-date">{{ d.dia | number:'2.0-0' }}/{{ d.mes | number:'2.0-0' }}</span>
+      </div>
+    } @empty {
+      <p class="empty">Nenhuma data cadastrada.</p>
+    }
+  </div>
+
+</div>
+
+<!-- Modal Stats -->
+@if (stats(); as s) {
+  <div class="modal-overlay" (click)="closeStats()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="stats-header" [style.background]="s.cor">
+        <span class="stats-nome">{{ s.nome }}</span>
+        <span class="stats-data">{{ s.dia }}/{{ s.mes }}</span>
+      </div>
+      <div class="stats-body">
+        <div class="stat-item">
+          <div class="stat-label">Dias restantes</div>
+          <div class="stat-value big">
+            @if (s.diasRestantes === 0) { Hoje! }
+            @else { {{ s.diasRestantes }} dias }
+          </div>
+        </div>
+        <div class="stat-item">
+          <div class="stat-label">Pedidos vinculados</div>
+          <div class="stat-value big">{{ s.totalPedidos }}</div>
+        </div>
+        <div class="stat-item full">
+          <div class="stat-label">Valor arrecadado</div>
+          <div class="stat-value big green">{{ formatValor(s.valorArrecadado) }}</div>
+        </div>
+      </div>
+      <div class="stats-actions">
+        <button class="btn-fechar" (click)="closeStats()">Fechar</button>
+        <button class="btn-excluir" (click)="delete(s.id)">🗑️ Excluir Data</button>
+      </div>
+    </div>
+  </div>
+}
+
+@if (loadingStats()) {
+  <div class="modal-overlay">
+    <div class="loading">Carregando...</div>
+  </div>
+}
+
+<!-- Modal Adicionar Data -->
+@if (showAddForm()) {
+  <div class="modal-overlay" (click)="showAddForm.set(false)">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <h3>Nova Data Comemorativa</h3>
+      <form [formGroup]="form" (ngSubmit)="saveData()">
+        <div class="form-grid">
+          <div class="form-group full">
+            <label>Nome *</label>
+            <input formControlName="nome" placeholder="ex: Dia do Amigo" />
+          </div>
+          <div class="form-group">
+            <label>Mês *</label>
+            <select formControlName="mes">
+              @for (m of monthNames; track $index) {
+                <option [value]="$index + 1">{{ m }}</option>
+              }
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Dia *</label>
+            <input type="number" formControlName="dia" min="1" max="31" />
+          </div>
+          <div class="form-group full">
+            <label>Cor</label>
+            <div class="cor-options">
+              @for (c of cores; track c) {
+                <button type="button" class="cor-btn" [style.background]="c"
+                        [class.selected]="form.value.cor === c"
+                        (click)="selectCor(c)"></button>
+              }
+            </div>
+          </div>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-fechar" (click)="showAddForm.set(false)">Cancelar</button>
+          <button type="submit" class="btn-salvar">Salvar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

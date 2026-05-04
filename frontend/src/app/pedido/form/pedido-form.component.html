@@ -1,0 +1,86 @@
+<div class="modal-overlay" (click)="cancel()">
+  <div class="modal-form" (click)="$event.stopPropagation()">
+    <h2>{{ pedido() ? 'Editar Pedido' : 'Novo Pedido' }}</h2>
+
+    <form [formGroup]="form" (ngSubmit)="submit()">
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label>Nome do Cliente *</label>
+          <input formControlName="nomeCliente" [class.invalid]="isInvalid('nomeCliente')" />
+        </div>
+
+        <div class="form-group">
+          <label>WhatsApp *</label>
+          <input formControlName="whatsapp" placeholder="(85) 99999-9999" [class.invalid]="isInvalid('whatsapp')" />
+        </div>
+
+        <div class="form-group full">
+          <label>Item *</label>
+          <input formControlName="item" [class.invalid]="isInvalid('item')" />
+        </div>
+
+        <div class="form-group">
+          <label>Valor (R$) *</label>
+          <input type="number" formControlName="valor" min="0" step="0.01" [class.invalid]="isInvalid('valor')" />
+        </div>
+
+        <div class="form-group">
+          <label>Data de Entrega *</label>
+          <input type="date" formControlName="dataEntrega" [class.invalid]="isInvalid('dataEntrega')" />
+        </div>
+
+        <div class="form-group">
+          <label>Status do Pedido</label>
+          <select formControlName="statusPedido">
+            <option value="FILA">Na Fila</option>
+            <option value="INICIADO">Iniciado</option>
+            <option value="FINALIZADO">Finalizado</option>
+            <option value="CANCELADO">Cancelado</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Status Pagamento</label>
+          <select formControlName="statusPagamento">
+            <option value="PENDENTE">Pendente</option>
+            <option value="PAGO">Pago</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Horas Estimadas</label>
+          <input type="number" formControlName="tempoEstimado" min="1" placeholder="ex: 8" />
+        </div>
+
+        <div class="form-group full">
+          <label>Endereço</label>
+          <input formControlName="endereco" />
+        </div>
+
+        <div class="form-group full">
+          <label>Notas</label>
+          <textarea formControlName="nota" rows="3"></textarea>
+        </div>
+
+        <div class="form-group full">
+          <label>Data Comemorativa</label>
+          <select formControlName="dataComemorativaId">
+            <option [ngValue]="null">— Nenhuma —</option>
+            @for (d of datasComem(); track d.id) {
+              <option [ngValue]="d.id">{{ d.nome }} ({{ d.dia }}/{{ d.mes }})</option>
+            }
+          </select>
+        </div>
+
+      </div>
+
+      <div class="form-actions">
+        <button type="button" class="btn-cancelar" (click)="cancel()">Cancelar</button>
+        <button type="submit" class="btn-salvar" [disabled]="loading()">
+          {{ loading() ? 'Salvando...' : 'Salvar' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
