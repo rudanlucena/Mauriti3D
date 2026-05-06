@@ -37,7 +37,8 @@ export class PedidoFormComponent implements OnInit {
       valor:             [p?.valor ?? null, [Validators.required, Validators.min(0)]],
       statusPagamento:   [p?.statusPagamento ?? 'PENDENTE', Validators.required],
       statusPedido:      [p?.statusPedido ?? 'FILA', Validators.required],
-      tempoEstimado:     [p?.tempoEstimado ?? ''],
+      duracaoHoras:      [p?.duracaoHoras ?? null, [Validators.required, Validators.min(0)]],
+      duracaoMinutos:    [p?.duracaoMinutos ?? null, [Validators.required, Validators.min(0), Validators.max(59)]],
       endereco:          [p?.endereco ?? ''],
       nota:              [p?.nota ?? ''],
       dataComemorativaId:[p?.dataComemorativaId ?? null]

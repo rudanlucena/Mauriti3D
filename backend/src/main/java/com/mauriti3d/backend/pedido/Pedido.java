@@ -54,7 +54,14 @@ public class Pedido {
     @Enumerated(EnumType.STRING)
     private StatusPedido statusPedido;
 
-    private String tempoEstimado;
+    @NotNull
+    @Column(name = "duracao_horas")
+    private Integer duracaoHoras;
+
+    @NotNull
+    @Column(name = "duracao_minutos")
+    private Integer duracaoMinutos;
+
     private String endereco;
 
     @Column(name = "data_comemorativa_id")

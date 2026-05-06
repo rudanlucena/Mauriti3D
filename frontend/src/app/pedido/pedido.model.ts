@@ -19,7 +19,8 @@ export interface Pedido {
   valor: number;
   statusPagamento: StatusPagamento;
   statusPedido: StatusPedido;
-  tempoEstimado?: string;
+  duracaoHoras: number;
+  duracaoMinutos: number;
   endereco?: string;
   dataComemorativaId?: number | null;
   criadoEm?: string;
