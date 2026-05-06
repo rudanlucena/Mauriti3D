@@ -17,3 +17,12 @@ export interface DashboardResumo {
   saldoEsperado: number;
   despesasMes: Despesa[];
 }
+
+export interface DashboardDiario {
+  data: string;
+  totalMinutos: number;
+  totalValor: number;
+  totalPedidos: number;
+  mediaMinutosPorDia: number;
+  mediaValorPorDia: number;
+}

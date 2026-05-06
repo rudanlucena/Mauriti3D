@@ -1,0 +1,54 @@
+<div class="dia-panel">
+
+  <div class="dia-header">
+    <span class="dia-title">⏱ Produção do Dia</span>
+    <div class="dia-nav">
+      <button (click)="prevDia()">‹</button>
+      <span class="dia-label" [class.hoje]="isHoje()">{{ labelData() }}</span>
+      <button (click)="nextDia()" [disabled]="isHoje()">›</button>
+    </div>
+  </div>
+
+  @if (resumo(); as r) {
+    <div class="kpis">
+      <div class="kpi kpi-horas">
+        <div class="kpi-icon">🖨️</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Horas impressas</div>
+          <div class="kpi-value">{{ fmtTempo(r.totalMinutos) }}</div>
+        </div>
+      </div>
+
+      <div class="kpi kpi-valor">
+        <div class="kpi-icon">💰</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Valor gerado</div>
+          <div class="kpi-value">{{ fmtValor(r.totalValor) }}</div>
+        </div>
+      </div>
+
+      <div class="kpi kpi-pedidos">
+        <div class="kpi-icon">📦</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Pedidos</div>
+          <div class="kpi-value">{{ r.totalPedidos }}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="media-header">Média mensal</div>
+    <div class="medias">
+      <div class="media-item">
+        <span class="media-label">Horas/dia</span>
+        <span class="media-value">{{ fmtTempo(r.mediaMinutosPorDia) }}</span>
+      </div>
+      <div class="media-item">
+        <span class="media-label">Valor/dia</span>
+        <span class="media-value">{{ fmtValor(r.mediaValorPorDia) }}</span>
+      </div>
+    </div>
+  }
+
+</div>

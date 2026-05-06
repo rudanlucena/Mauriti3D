@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Despesa, DashboardResumo } from './despesa.model';
+import { Despesa, DashboardResumo, DashboardDiario } from './despesa.model';
 
 @Injectable({ providedIn: 'root' })
 export class DespesaService {
@@ -9,6 +9,10 @@ export class DespesaService {
 
   getResumo(mes: number, ano: number): Observable<DashboardResumo> {
     return this.http.get<DashboardResumo>(`/api/dashboard/mensal?mes=${mes}&ano=${ano}`);
+  }
+
+  getDiario(data: string): Observable<DashboardDiario> {
+    return this.http.get<DashboardDiario>(`/api/dashboard/diario?data=${data}`);
   }
 
   create(despesa: Despesa): Observable<Despesa> {
