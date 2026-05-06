@@ -14,4 +14,12 @@ public interface DespesaRepository extends JpaRepository<Despesa, Long> {
 
     @Query("SELECT SUM(d.valor) FROM Despesa d WHERE YEAR(d.data) = :ano AND MONTH(d.data) = :mes")
     BigDecimal sumByMes(@Param("ano") int ano, @Param("mes") int mes);
+
+    @Query(value = """
+        SELECT EXTRACT(YEAR FROM data)::int, EXTRACT(MONTH FROM data)::int, COALESCE(SUM(valor), 0)
+        FROM despesas
+        WHERE data >= NOW() - CAST(:meses || ' months' AS INTERVAL)
+        GROUP BY EXTRACT(YEAR FROM data), EXTRACT(MONTH FROM data)
+    """, nativeQuery = true)
+    List<Object[]> statsMensais(@Param("meses") int meses);
 }

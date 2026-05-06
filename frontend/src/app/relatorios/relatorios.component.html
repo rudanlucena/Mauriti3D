@@ -1,0 +1,138 @@
+<div class="rel-page">
+
+  <!-- Header -->
+  <div class="rel-header">
+    <div>
+      <h1 class="rel-title">📊 Relatórios</h1>
+      <p class="rel-sub">Visão geral do negócio de impressão 3D</p>
+    </div>
+    <div class="periodo-toggle">
+      <button [class.active]="meses() === 6"  (click)="setMeses(6)">6 meses</button>
+      <button [class.active]="meses() === 12" (click)="setMeses(12)">12 meses</button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="loading">Carregando relatórios...</div>
+  }
+
+  @if (dados(); as d) {
+
+    <!-- KPI Cards -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:#f0fdf4">💰</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Total Faturado</div>
+          <div class="kpi-val green">{{ fmtValor(d.kpis.receitaTotal) }}</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:#fff7ed">⏱</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Horas Impressas</div>
+          <div class="kpi-val orange">{{ fmtTempo(d.kpis.totalMinutosImpressos) }}</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:#eff6ff">📦</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Pedidos Finalizados</div>
+          <div class="kpi-val blue">{{ d.kpis.pedidosFinalizados }}</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:#f0fdf4">📈</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Taxa de Conclusão</div>
+          <div class="kpi-val green">{{ fmtPct(d.kpis.taxaConclusao) }}</div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:#fef9c3">💵</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Ticket Médio</div>
+          <div class="kpi-val yellow">
+            {{ d.kpis.pedidosFinalizados > 0 ? fmtValor(d.kpis.receitaTotal / d.kpis.pedidosFinalizados) : '—' }}
+          </div>
+        </div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-icon" style="background:#fdf4ff">⏰</div>
+        <div class="kpi-body">
+          <div class="kpi-label">Tempo Médio/Pedido</div>
+          <div class="kpi-val purple">{{ fmtTempo(d.kpis.minutosMediaPorPedido) }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Linha 1: Faturamento x Custos (wide) + Status (narrow) -->
+    <div class="charts-row">
+      <div class="chart-card wide">
+        <div class="chart-header">
+          <span class="chart-title">Faturamento &amp; Custos</span>
+        </div>
+        <div class="chart-wrap">
+          <canvas #cFaturamento></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card narrow">
+        <div class="chart-header"><span class="chart-title">Status dos Pedidos</span></div>
+        <div class="chart-wrap" style="height:220px">
+          <canvas #cStatus></canvas>
+        </div>
+        <div class="status-list">
+          @for (s of d.statusDistribuicao; track s.status) {
+            <div class="status-item">
+              <span class="status-label">{{ s.label }}</span>
+              <span class="status-count">{{ s.count }}</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Linha 2: Horas + Top Clientes -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-header"><span class="chart-title">⏱ Horas de Impressão por Mês</span></div>
+        <div class="chart-wrap">
+          <canvas #cHoras></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header"><span class="chart-title">🏆 Top Clientes</span></div>
+        @if (d.topClientes.length === 0) {
+          <p class="empty-msg">Sem pedidos finalizados e pagos ainda.</p>
+        } @else {
+          <div class="chart-wrap">
+            <canvas #cClientes></canvas>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Linha 3: Pedidos/Dia + Lucro Mensal -->
+    <div class="charts-row">
+      <div class="chart-card">
+        <div class="chart-header">
+          <span class="chart-title">📅 Pedidos por Dia da Semana</span>
+          <span class="chart-sub">acumulado histórico</span>
+        </div>
+        <div class="chart-wrap">
+          <canvas #cDias></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-header"><span class="chart-title">📈 Lucro Mensal</span></div>
+        <div class="chart-wrap">
+          <canvas #cLucro></canvas>
+        </div>
+      </div>
+    </div>
+
+  }
+</div>
