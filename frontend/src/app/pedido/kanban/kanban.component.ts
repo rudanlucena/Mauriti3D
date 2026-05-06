@@ -1,21 +1,24 @@
-import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Subject, debounceTime, takeUntil } from 'rxjs';
 import { PedidoService } from '../pedido.service';
 import { Pedido, StatusPedido } from '../pedido.model';
 import { PedidoFormComponent } from '../form/pedido-form.component';
 import { DashboardPanelComponent } from './dashboard-panel/dashboard-panel.component';
+import { DiaPanelComponent } from './dia-panel/dia-panel.component';
 import { DataComemorativaService } from '../../data-comemorativa/data-comemorativa.service';
 import { DataComemorativa } from '../../data-comemorativa/data-comemorativa.model';
 
 @Component({
   selector: 'app-kanban',
   standalone: true,
-  imports: [CommonModule, PedidoFormComponent, DashboardPanelComponent],
+  imports: [CommonModule, PedidoFormComponent, DashboardPanelComponent, DiaPanelComponent],
   templateUrl: './kanban.component.html',
   styleUrl: './kanban.component.scss'
 })
 export class KanbanComponent implements OnInit, OnDestroy {
+  @ViewChild(DiaPanelComponent) private diaPanel!: DiaPanelComponent;
+
   private pedidoService = inject(PedidoService);
   private dataService = inject(DataComemorativaService);
   private searchSubject = new Subject<string>();
@@ -129,6 +132,7 @@ export class KanbanComponent implements OnInit, OnDestroy {
     this.closeForm();
     this.loadAtivos();
     this.loadFinalizados();
+    this.diaPanel?.load();
   }
 
   delete(id: number) {
@@ -139,6 +143,16 @@ export class KanbanComponent implements OnInit, OnDestroy {
       if (isLast) this.finalizadosPagina.update(p => p - 1);
       this.loadAtivos();
       this.loadFinalizados();
+      this.diaPanel?.load();
+    });
+  }
+
+  moverStatus(pedido: Pedido, status: StatusPedido, event: Event) {
+    event.stopPropagation();
+    this.pedidoService.patchStatus(pedido.id!, status).subscribe(() => {
+      this.loadAtivos();
+      this.loadFinalizados();
+      this.diaPanel?.load();
     });
   }
 
@@ -151,9 +165,13 @@ export class KanbanComponent implements OnInit, OnDestroy {
     return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(valor);
   }
 
-  formatTempo(tempo: string | undefined): string {
-    if (!tempo) return '';
-    return /^\d+$/.test(tempo.trim()) ? `${tempo}h` : tempo;
+  formatTempo(pedido: Pedido): string {
+    const h = pedido.duracaoHoras ?? 0;
+    const m = pedido.duracaoMinutos ?? 0;
+    if (h === 0 && m === 0) return '';
+    if (m === 0) return `${h}h`;
+    if (h === 0) return `${m}min`;
+    return `${h}h ${m}min`;
   }
 
   formatData(date: string): string {

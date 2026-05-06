@@ -24,17 +24,26 @@
                 <div class="card-cliente">{{ pedido.nomeCliente }}</div>
                 <div class="card-item">{{ pedido.item }}</div>
               </div>
+              @if (formatTempo(pedido)) {
+                <span class="card-tempo">⏱ {{ formatTempo(pedido) }}</span>
+              }
             </div>
             <div class="card-footer">
               <span class="card-valor" [class.pago]="pedido.statusPagamento === 'PAGO'" [class.pendente]="pedido.statusPagamento === 'PENDENTE'">
                 {{ formatValor(pedido.valor) }}
               </span>
-              <div class="card-meta">
-                @if (pedido.tempoEstimado) {
-                  <span class="card-tempo">⏱ {{ formatTempo(pedido.tempoEstimado) }}</span>
-                }
-                <span class="card-data">{{ formatData(pedido.dataEntrega) }}</span>
-              </div>
+              <span class="card-data">{{ formatData(pedido.dataEntrega) }}</span>
+            </div>
+            <div class="card-actions">
+              @if (pedido.statusPedido === 'INICIADO') {
+                <button class="btn-mover voltar" (click)="moverStatus(pedido, 'FILA', $event)" title="Voltar para Fila">‹ Fila</button>
+              }
+              @if (pedido.statusPedido === 'FILA') {
+                <button class="btn-mover avancar" (click)="moverStatus(pedido, 'INICIADO', $event)" title="Mover para Iniciado">Iniciar ›</button>
+              }
+              @if (pedido.statusPedido === 'INICIADO') {
+                <button class="btn-mover finalizar" (click)="moverStatus(pedido, 'FINALIZADO', $event)" title="Finalizar">Finalizar ✓</button>
+              }
             </div>
           </div>
         } @empty {
@@ -64,8 +73,8 @@
             <span class="card-valor" [class.pago]="pedido.statusPagamento === 'PAGO'" [class.pendente]="pedido.statusPagamento === 'PENDENTE'">
               {{ formatValor(pedido.valor) }}
             </span>
-            @if (pedido.tempoEstimado) {
-              <span class="card-tempo">⏱ {{ formatTempo(pedido.tempoEstimado) }}</span>
+            @if (formatTempo(pedido)) {
+              <span class="card-tempo">⏱ {{ formatTempo(pedido) }}</span>
             }
           </div>
           <div class="card-data">📅 {{ formatData(pedido.dataEntrega) }}</div>
@@ -83,7 +92,10 @@
     }
   </div>
 
-  <!-- Dashboard -->
+  <!-- Dashboard Diário -->
+  <app-dia-panel />
+
+  <!-- Dashboard Mensal -->
   <app-dashboard-panel />
 
 </div>
@@ -116,10 +128,10 @@
           <div class="label">Data de Entrega</div>
           <div class="value">{{ formatData(p.dataEntrega) }}</div>
         </div>
-        @if (p.tempoEstimado) {
+        @if (formatTempo(p)) {
           <div class="info-item">
             <div class="label">Tempo Estimado</div>
-            <div class="value">{{ formatTempo(p.tempoEstimado) }}</div>
+            <div class="value">{{ formatTempo(p) }}</div>
           </div>
         }
         @if (p.endereco) {

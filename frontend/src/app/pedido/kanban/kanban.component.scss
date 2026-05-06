@@ -220,6 +220,51 @@
     font-size: 0.75rem;
     color: #94a3b8;
   }
+
+  .card-actions {
+    display: flex;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  &:hover .card-actions { opacity: 1; }
+}
+
+.btn-mover {
+  flex: 1;
+  padding: 0.28rem 0.5rem;
+  border-radius: 7px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: all 0.15s;
+  line-height: 1;
+
+  &.avancar {
+    background: #eff6ff;
+    color: #2563eb;
+    border-color: #bfdbfe;
+    &:hover { background: #2563eb; color: #fff; }
+  }
+
+  &.finalizar {
+    background: #f0fdf4;
+    color: #16a34a;
+    border-color: #bbf7d0;
+    &:hover { background: #16a34a; color: #fff; }
+  }
+
+  &.voltar {
+    background: #f8fafc;
+    color: #64748b;
+    border-color: #e2e8f0;
+    flex: 0 0 auto;
+    &:hover { background: #f1f5f9; color: #334155; }
+  }
 }
 
 // Border-left by column context

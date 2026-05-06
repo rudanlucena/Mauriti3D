@@ -26,6 +26,10 @@ export class PedidoService {
     return this.http.put<Pedido>(`${this.api}/${id}`, pedido);
   }
 
+  patchStatus(id: number, status: string): Observable<Pedido> {
+    return this.http.patch<Pedido>(`${this.api}/${id}/status?status=${status}`, null);
+  }
+
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.api}/${id}`);
   }

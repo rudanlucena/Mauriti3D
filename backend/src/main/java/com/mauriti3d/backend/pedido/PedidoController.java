@@ -44,6 +44,11 @@ public class PedidoController {
         return service.update(id, pedido);
     }
 
+    @PatchMapping("/{id}/status")
+    public Pedido updateStatus(@PathVariable Long id, @RequestParam StatusPedido status) {
+        return service.updateStatus(id, status);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {

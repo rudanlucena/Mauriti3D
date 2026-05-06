@@ -39,6 +39,12 @@ public class PedidoService {
         return repository.save(pedido);
     }
 
+    public Pedido updateStatus(Long id, StatusPedido status) {
+        Pedido existing = findById(id);
+        existing.setStatusPedido(status);
+        return repository.save(existing);
+    }
+
     public void delete(Long id) {
         findById(id);
         repository.deleteById(id);
