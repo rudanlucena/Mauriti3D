@@ -6,6 +6,18 @@
   <button class="btn-novo" (click)="openCreate()">+ Novo Pedido</button>
 </div>
 
+<div class="kpi-bar">
+  <div class="kpi-card" [class.kpi-alerta]="pedidosAtrasados() > 0">
+    <span class="kpi-number">{{ pedidosAtrasados() }}</span>
+    <span class="kpi-label">{{ pedidosAtrasados() === 1 ? 'Pedido Atrasado' : 'Pedidos Atrasados' }}</span>
+  </div>
+  <div class="kpi-sep"></div>
+  <div class="kpi-card">
+    <span class="kpi-number">{{ totalGeral() }}</span>
+    <span class="kpi-label">Total de Pedidos</span>
+  </div>
+</div>
+
 <div class="kanban-board">
 
   <!-- FILA e INICIADO -->

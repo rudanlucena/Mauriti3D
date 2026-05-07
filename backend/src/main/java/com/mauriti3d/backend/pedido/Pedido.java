@@ -67,6 +67,10 @@ public class Pedido {
     @Column(name = "data_comemorativa_id")
     private Long dataComemorativaId;
 
+    @Column(name = "data_finalizacao")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
+    private LocalDate dataFinalizacao;
+
     @CreationTimestamp
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime criadoEm;

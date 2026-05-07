@@ -1,0 +1,54 @@
+<div class="dp-container" [class.dp-invalid]="invalid()">
+
+  <div class="dp-header">
+    <button type="button" class="dp-nav" (click)="prevMes()">‹</button>
+    <span class="dp-title">{{ MESES[viewMonth() - 1] }} {{ viewYear() }}</span>
+    <button type="button" class="dp-nav" (click)="nextMes()">›</button>
+  </div>
+
+  <div class="dp-weekdays">
+    @for (d of DIAS_SEMANA; track d) {
+      <span>{{ d }}</span>
+    }
+  </div>
+
+  <div class="dp-grid">
+    @for (cell of cells(); track cell.dateStr || $index) {
+      @if (cell.day === null) {
+        <span class="dp-empty"></span>
+      } @else {
+        <button
+          type="button"
+          class="dp-day"
+          [class.selected]="cell.isSelected"
+          [class.today]="cell.isToday"
+          [class.load-low]="!cell.isSelected && cell.loadLevel === 'low'"
+          [class.load-medium]="!cell.isSelected && cell.loadLevel === 'medium'"
+          [class.load-high]="!cell.isSelected && cell.loadLevel === 'high'"
+          [class.load-full]="!cell.isSelected && cell.loadLevel === 'full'"
+          [title]="cell.tooltip"
+          (click)="selectDay(cell)"
+        >
+          {{ cell.day }}
+          @if (cell.badge > 0) {
+            <span class="dp-badge">{{ cell.badge }}</span>
+          }
+        </button>
+      }
+    }
+  </div>
+
+  <div class="dp-legend">
+    <span class="leg-item"><span class="leg-dot ld-low"></span>Tranquilo</span>
+    <span class="leg-item"><span class="leg-dot ld-medium"></span>Moderado</span>
+    <span class="leg-item"><span class="leg-dot ld-high"></span>Pesado</span>
+    <span class="leg-item"><span class="leg-dot ld-full"></span>Lotado</span>
+  </div>
+
+  @if (value()) {
+    <div class="dp-selected-label">
+      Entrega selecionada: <strong>{{ formatSelected() }}</strong>
+    </div>
+  }
+
+</div>

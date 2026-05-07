@@ -58,6 +58,13 @@ export class KanbanComponent implements OnInit, OnDestroy {
   finalizadosTotalItems = signal(0);
   readonly pageSize = 10;
 
+  // KPIs de topo
+  readonly hoje = new Date().toISOString().split('T')[0];
+  pedidosAtrasados = computed(() =>
+    this.ativos().filter(p => p.dataEntrega < this.hoje).length
+  );
+  totalGeral = computed(() => this.ativos().length + this.finalizadosTotalItems());
+
   ngOnInit() {
     this.searchSubject.pipe(debounceTime(350), takeUntil(this.destroy$)).subscribe(() => {
       this.limites.set({ FILA: 10, INICIADO: 10 });

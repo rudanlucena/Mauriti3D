@@ -1,7 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { Pedido, PageResponse } from './pedido.model';
+import { Pedido, PageResponse, CargaDia } from './pedido.model';
 
 @Injectable({ providedIn: 'root' })
 export class PedidoService {
@@ -32,5 +32,9 @@ export class PedidoService {
 
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.api}/${id}`);
+  }
+
+  getCargaPorDia(mes: number, ano: number): Observable<CargaDia[]> {
+    return this.http.get<CargaDia[]>(`${this.api}/carga-por-dia?mes=${mes}&ano=${ano}`);
   }
 }

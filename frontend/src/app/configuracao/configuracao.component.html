@@ -1,0 +1,63 @@
+<div class="config-page">
+  <div class="config-card">
+    <div class="card-header">
+      <h1>Configurações</h1>
+      <p class="subtitle">Defina as metas diárias para o painel e o calendário inteligente de pedidos.</p>
+    </div>
+
+    @if (loading()) {
+      <p class="msg-loading">Carregando...</p>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="save()">
+
+        <div class="section">
+          <h2>Meta de Produção Diária</h2>
+
+          <div class="field-row">
+            <div class="form-group">
+              <label>Tempo de impressão (meta/dia)</label>
+              <div class="time-row">
+                <div class="time-input">
+                  <input type="number" formControlName="metaHorasDia" min="0" max="24" placeholder="0" />
+                  <span class="unit">h</span>
+                </div>
+                <div class="time-input">
+                  <input type="number" formControlName="metaMinutosDia" min="0" max="59" placeholder="0" />
+                  <span class="unit">min</span>
+                </div>
+              </div>
+              @if (metaTotalMinutos > 0) {
+                <small class="hint">= {{ metaTotalMinutos }} minutos por dia</small>
+              }
+            </div>
+
+            <div class="form-group">
+              <label>Faturamento diário (meta)</label>
+              <div class="value-row">
+                <span class="prefix">R$</span>
+                <input type="number" formControlName="metaValorDia" min="0" step="0.01" placeholder="0,00" />
+              </div>
+            </div>
+          </div>
+
+          <div class="info-box">
+            <strong>Como isso é usado:</strong> o calendário no formulário de novo pedido mostra
+            os dias coloridos — verde (tranquilo), amarelo (moderado), laranja (pesado), vermelho (lotado)
+            — com base na carga alocada em relação à sua meta de horas.
+          </div>
+        </div>
+
+        @if (saved()) {
+          <div class="msg-saved">Configurações salvas com sucesso!</div>
+        }
+
+        <div class="form-actions">
+          <button type="submit" class="btn-salvar" [disabled]="saving()">
+            {{ saving() ? 'Salvando...' : 'Salvar Configurações' }}
+          </button>
+        </div>
+
+      </form>
+    }
+  </div>
+</div>

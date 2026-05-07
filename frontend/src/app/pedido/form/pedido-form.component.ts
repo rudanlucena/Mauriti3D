@@ -5,11 +5,13 @@ import { PedidoService } from '../pedido.service';
 import { Pedido } from '../pedido.model';
 import { DataComemorativaService } from '../../data-comemorativa/data-comemorativa.service';
 import { DataComemorativa } from '../../data-comemorativa/data-comemorativa.model';
+import { ConfiguracaoService } from '../../configuracao/configuracao.service';
+import { DatePickerComponent } from '../../shared/date-picker/date-picker.component';
 
 @Component({
   selector: 'app-pedido-form',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DatePickerComponent],
   templateUrl: './pedido-form.component.html',
   styleUrl: './pedido-form.component.scss'
 })
@@ -21,13 +23,18 @@ export class PedidoFormComponent implements OnInit {
   private fb = inject(FormBuilder);
   private service = inject(PedidoService);
   private dataService = inject(DataComemorativaService);
+  private configService = inject(ConfiguracaoService);
 
   form!: FormGroup;
   loading = signal(false);
   datasComem = signal<DataComemorativa[]>([]);
+  metaTotalMinutos = signal<number>(480);
 
   ngOnInit() {
     this.dataService.getAll().subscribe(d => this.datasComem.set(d));
+    this.configService.get().subscribe(c => {
+      this.metaTotalMinutos.set(c.metaHorasDia * 60 + c.metaMinutosDia);
+    });
     const p = this.pedido();
     this.form = this.fb.group({
       nomeCliente:       [p?.nomeCliente ?? '', Validators.required],

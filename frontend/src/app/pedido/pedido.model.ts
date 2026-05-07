@@ -23,6 +23,13 @@ export interface Pedido {
   duracaoMinutos: number;
   endereco?: string;
   dataComemorativaId?: number | null;
+  dataFinalizacao?: string;
   criadoEm?: string;
   atualizadoEm?: string;
+}
+
+export interface CargaDia {
+  data: string;
+  totalPedidos: number;
+  totalMinutos: number;
 }

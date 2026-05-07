@@ -49,6 +49,13 @@ public class PedidoController {
         return service.updateStatus(id, status);
     }
 
+    @GetMapping("/carga-por-dia")
+    public List<CargaDiaDto> getCargaPorDia(
+            @RequestParam int mes,
+            @RequestParam int ano) {
+        return service.getCargaPorDia(mes, ano);
+    }
+
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id) {

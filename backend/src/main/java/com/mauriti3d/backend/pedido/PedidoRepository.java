@@ -34,28 +34,47 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     @Query("SELECT COUNT(p), SUM(p.valor) FROM Pedido p WHERE p.dataComemorativaId = :id")
     List<Object[]> getStatsByDataComemorativa(@Param("id") Long id);
 
-    @Query("SELECT SUM(p.valor) FROM Pedido p WHERE p.statusPagamento = 'PAGO' AND YEAR(p.criadoEm) = :ano AND MONTH(p.criadoEm) = :mes")
+    @Query(value = """
+        SELECT SUM(valor) FROM pedidos
+        WHERE status_pagamento = 'PAGO' AND status_pedido = 'FINALIZADO'
+        AND EXTRACT(YEAR FROM data_finalizacao) = :ano
+        AND EXTRACT(MONTH FROM data_finalizacao) = :mes
+    """, nativeQuery = true)
     BigDecimal sumArrecadadoByMes(@Param("ano") int ano, @Param("mes") int mes);
 
-    @Query("SELECT SUM(p.valor) FROM Pedido p WHERE p.statusPedido <> 'CANCELADO' AND YEAR(p.criadoEm) = :ano AND MONTH(p.criadoEm) = :mes")
+    @Query(value = """
+        SELECT SUM(valor) FROM pedidos
+        WHERE status_pedido <> 'CANCELADO'
+        AND (
+            (status_pedido = 'FINALIZADO'
+             AND EXTRACT(YEAR FROM data_finalizacao) = :ano
+             AND EXTRACT(MONTH FROM data_finalizacao) = :mes)
+            OR
+            (status_pedido <> 'FINALIZADO'
+             AND EXTRACT(YEAR FROM data_entrega) = :ano
+             AND EXTRACT(MONTH FROM data_entrega) = :mes)
+        )
+    """, nativeQuery = true)
     BigDecimal sumSaldoByMes(@Param("ano") int ano, @Param("mes") int mes);
 
-    @Query("""
-        SELECT SUM(p.duracaoHoras * 60 + p.duracaoMinutos), SUM(p.valor), COUNT(p)
-        FROM Pedido p
-        WHERE DAY(p.criadoEm) = :dia AND MONTH(p.criadoEm) = :mes AND YEAR(p.criadoEm) = :ano
-        AND p.statusPedido = 'FINALIZADO'
-    """)
+    @Query(value = """
+        SELECT SUM(duracao_horas * 60 + duracao_minutos), SUM(valor), COUNT(*)
+        FROM pedidos
+        WHERE status_pedido = 'FINALIZADO'
+        AND EXTRACT(DAY   FROM data_finalizacao) = :dia
+        AND EXTRACT(MONTH FROM data_finalizacao) = :mes
+        AND EXTRACT(YEAR  FROM data_finalizacao) = :ano
+    """, nativeQuery = true)
     List<Object[]> statsByDia(@Param("dia") int dia, @Param("mes") int mes, @Param("ano") int ano);
 
     @Query(value = """
         SELECT
-          COALESCE(SUM(CASE WHEN status_pedido = 'FINALIZADO'
-                            THEN duracao_horas * 60 + duracao_minutos ELSE 0 END), 0),
-          COALESCE(SUM(CASE WHEN status_pedido = 'FINALIZADO' AND status_pagamento = 'PAGO'
-                            THEN valor ELSE 0 END), 0)
+          COALESCE(SUM(duracao_horas * 60 + duracao_minutos), 0),
+          COALESCE(SUM(CASE WHEN status_pagamento = 'PAGO' THEN valor ELSE 0 END), 0)
         FROM pedidos
-        WHERE EXTRACT(YEAR FROM criado_em) = :ano AND EXTRACT(MONTH FROM criado_em) = :mes
+        WHERE status_pedido = 'FINALIZADO'
+        AND EXTRACT(YEAR  FROM data_finalizacao) = :ano
+        AND EXTRACT(MONTH FROM data_finalizacao) = :mes
     """, nativeQuery = true)
     List<Object[]> statsMensaisParaMedia(@Param("ano") int ano, @Param("mes") int mes);
 
@@ -73,16 +92,17 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
 
     @Query(value = """
         SELECT
-          EXTRACT(YEAR FROM criado_em)::int,
-          EXTRACT(MONTH FROM criado_em)::int,
-          COALESCE(SUM(CASE WHEN status_pedido='FINALIZADO' AND status_pagamento='PAGO' THEN valor END), 0),
-          COALESCE(SUM(CASE WHEN status_pedido='FINALIZADO' THEN duracao_horas*60+duracao_minutos END), 0),
+          EXTRACT(YEAR  FROM data_finalizacao)::int,
+          EXTRACT(MONTH FROM data_finalizacao)::int,
+          COALESCE(SUM(CASE WHEN status_pagamento='PAGO' THEN valor ELSE 0 END), 0),
+          COALESCE(SUM(duracao_horas*60+duracao_minutos), 0),
           COUNT(*),
-          COUNT(CASE WHEN status_pedido='FINALIZADO' THEN 1 END)
+          COUNT(*)
         FROM pedidos
-        WHERE criado_em >= NOW() - CAST(:meses || ' months' AS INTERVAL)
-        GROUP BY EXTRACT(YEAR FROM criado_em), EXTRACT(MONTH FROM criado_em)
-        ORDER BY EXTRACT(YEAR FROM criado_em), EXTRACT(MONTH FROM criado_em)
+        WHERE status_pedido = 'FINALIZADO'
+        AND data_finalizacao >= NOW() - CAST(:meses || ' months' AS INTERVAL)
+        GROUP BY EXTRACT(YEAR FROM data_finalizacao), EXTRACT(MONTH FROM data_finalizacao)
+        ORDER BY EXTRACT(YEAR FROM data_finalizacao), EXTRACT(MONTH FROM data_finalizacao)
     """, nativeQuery = true)
     List<Object[]> statsMensais(@Param("meses") int meses);
 
@@ -97,13 +117,24 @@ public interface PedidoRepository extends JpaRepository<Pedido, Long> {
     List<Object[]> topClientes(@Param("lim") int lim);
 
     @Query(value = """
-        SELECT EXTRACT(DOW FROM criado_em)::int, COUNT(*)
+        SELECT EXTRACT(DOW FROM data_finalizacao)::int, COUNT(*)
         FROM pedidos
-        WHERE status_pedido <> 'CANCELADO'
-        GROUP BY EXTRACT(DOW FROM criado_em)
-        ORDER BY EXTRACT(DOW FROM criado_em)
+        WHERE status_pedido = 'FINALIZADO'
+        GROUP BY EXTRACT(DOW FROM data_finalizacao)
+        ORDER BY EXTRACT(DOW FROM data_finalizacao)
     """, nativeQuery = true)
     List<Object[]> pedidosPorDiaSemana();
+
+    @Query(value = """
+        SELECT data_entrega::text, COUNT(*), COALESCE(SUM(duracao_horas * 60 + duracao_minutos), 0)
+        FROM pedidos
+        WHERE status_pedido NOT IN ('CANCELADO', 'FINALIZADO')
+        AND EXTRACT(YEAR  FROM data_entrega) = :ano
+        AND EXTRACT(MONTH FROM data_entrega) = :mes
+        GROUP BY data_entrega
+        ORDER BY data_entrega
+    """, nativeQuery = true)
+    List<Object[]> cargaPorDia(@Param("ano") int ano, @Param("mes") int mes);
 
     @Query(value = "SELECT status_pedido, COUNT(*) FROM pedidos GROUP BY status_pedido", nativeQuery = true)
     List<Object[]> statusDistribuicao();
